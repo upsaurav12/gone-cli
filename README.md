@@ -1,10 +1,10 @@
-# ⚡ Go Bootstrapper
+#  Go Bootstrapper
 
 **Go Bootstrapper** is a CLI tool that scaffolds production-ready Golang projects — no dependency headaches, no manual setup.  
 Just run a command and get a fully configured project with linters, routers, and structure ready to code.
 
 * * *
-## 📦 Installation
+##  Installation
 
 Install globally using `go install`:
 
@@ -32,10 +32,10 @@ bootstrap new myapp --type=rest --router=gin --db=postgres
 
 * * *
 
-## 📁 Example Project Structure 
+## Example Project Structure 
 
 ```
-📦 myapp/
+ myapp/
 ├── Makefile
 ├── README.md
 ├── cmd/
@@ -55,7 +55,7 @@ bootstrap new myapp --type=rest --router=gin --db=postgres
 
 * * *
 
-## ⚙️ CLI Options
+##  CLI Options
 
 | Flag | Description | Example |
 | --- | --- | --- |
@@ -66,7 +66,7 @@ bootstrap new myapp --type=rest --router=gin --db=postgres
 
 * * *
 
-## 💡 Why Go Bootstrapper?
+##  Why Go Bootstrapper?
 
 Developers often waste time repeating setup tasks — creating folders, configuring routers, writing Makefiles, adding linters, etc.
 
@@ -79,7 +79,7 @@ It’s like:
 
 * * *
 
-## 🛣️ Roadmap
+##  Roadmap
 
 *    Add `--with-auth` flag for JWT + middleware setup
 *    `add` command to make CLI tool more extensible to generate ``service``, ``handlers``, ``controllers``.
@@ -89,7 +89,7 @@ It’s like:
 
 * * *
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, feedback, and ideas are welcome!  
 Feel free to open an issue or PR on [GitHub](https://github.com/upsaurav12/bootstrap).
@@ -98,7 +98,7 @@ Consider star the project 🙏
 
 * * *
 
-## 📄 License
+##  License
 
 Licensed under the **MIT License** © 2025 [Saurav Upadhyay](https://github.com/upsaurav12)
 
