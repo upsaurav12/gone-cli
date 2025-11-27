@@ -1,6 +1,6 @@
 /*
 
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
+Copyright © 2025 Saurav Upadhyay sauravup041103@gmail.com
 
 */
 
@@ -64,9 +64,7 @@ func createNewProject(projectName string, projectRouter string, template string,
 		fmt.Fprintf(out, "Error creating directory: %v\n", err)
 		return
 	}
-	// Print the template that was passed
 
-	// Always add README + Makefile from common
 	renderTemplateDir("common", projectName, TemplateData{
 		ModuleName: projectName,
 		PortName:   projectPort,
@@ -133,6 +131,8 @@ func renderTemplateDir(templatePath, destinationPath string, data TemplateData) 
 		if err != nil {
 			return err
 		}
+
+		fmt.Println("path for tmpl: ", filepath.Base(path))
 
 		// Write file
 		outFile, err := os.Create(targetPath)
