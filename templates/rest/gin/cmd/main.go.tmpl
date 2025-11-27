@@ -16,9 +16,13 @@ import (
 func main() {
 	cfg := config.New()
 
+	// Initialize database only if selected
 	{{- if .DBType }}
-	db.Connect()
-	defer db.Close()
+	database, err := db.Connect()
+	if err != nil {
+		log.Fatalf("DB init error: %v", err)
+	}
+	defer database.Close()
 	{{- end }}
 
 	r := gin.Default()
@@ -29,7 +33,7 @@ func main() {
 		port = "{{.PortName}}"
 	}
 
-	log.Printf("🚀 starting server on :%s", port)
+	log.Printf("🚀 Starting server on :%s", port)
 	if err := r.Run(":" + port); err != nil {
 		log.Fatal(err)
 	}
