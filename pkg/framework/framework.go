@@ -2,12 +2,6 @@ package framework
 
 import "fmt"
 
-type Framework interface {
-	Name() string
-	AddImports() error
-	Generate() error
-}
-
 type FrameworkConfig struct {
 	Imports       string
 	Entity        string

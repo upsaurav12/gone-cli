@@ -86,6 +86,11 @@ type TemplateData struct {
 	DSN           string
 }
 
+type TemplateJob struct {
+	TemplateDir string
+	DestDir     string
+}
+
 func init() {
 	// Add the new command to the rootCmd
 	rootCmd.AddCommand(newCmd)
@@ -99,32 +104,13 @@ func init() {
 	newCmd.Flags().StringVar(&Entitys, "entity", "", "entity")
 }
 
-func createNewProject(projectName string, projectRouter string, template string, out io.Writer) {
-	err := os.Mkdir(projectName, 0755)
-	if err != nil {
-		fmt.Fprintf(out, "Error creating directory: %v\n", err)
-		return
-	}
+func buildTemplateData(projectName string,
+	projectPort string,
+	frameworkConfig framework.FrameworkConfig,
+	dbConfig *addons.DbAddOneConfig, // optional
+	entity string, uppercase string) TemplateData {
 
-	os.MkdirAll(filepath.Join(projectName, "internal"), 0755)
-
-	// Always add README + Makefile from common
-	renderTemplateDir("common", projectName, TemplateData{
-		ModuleName: projectName,
-		PortName:   projectPort,
-	})
-
-	var uppercase string
-	if len(Entitys) > 0 {
-		runes := []rune(Entitys)
-		runes[0] = unicode.ToUpper(runes[0])
-
-		uppercase = string(runes)
-	}
-
-	frameworkConfig := framework.FrameworkRegistory[projectRouter]
-
-	renderTemplateDir("rest/clean", projectName, TemplateData{
+	data := TemplateData{
 		ModuleName:    projectName,
 		PortName:      projectPort,
 		DBType:        DBType,
@@ -145,44 +131,66 @@ func createNewProject(projectName string, projectRouter string, template string,
 		Response:      frameworkConfig.Response,
 		ImportHandler: frameworkConfig.ImportHandler,
 		ImportRouter:  frameworkConfig.ImportRouter,
-	})
-
-	if err != nil {
-		fmt.Fprintf(out, "Error rendering templates: %v\n", err)
-		return
 	}
 
+	if dbConfig != nil {
+		data.ServiceName = dbConfig.ServiceName
+		data.DBName = dbConfig.DBName
+		data.DBEnvPrefix = dbConfig.DBEnvPrefix
+		data.Port = dbConfig.Port
+		data.DSN = dbConfig.DSN
+		data.Driver = dbConfig.Driver
+		data.Import = dbConfig.Import
+		data.Image = dbConfig.Image
+		data.Environment = dbConfig.Environment
+		data.Volume = dbConfig.Volume
+		data.VolumeName = dbConfig.VolumeName
+	}
+
+	return data
+}
+
+func returnUppercase() string {
+	var uppercase string
+	if len(Entitys) > 0 {
+		runes := []rune(Entitys)
+		runes[0] = unicode.ToUpper(runes[0])
+
+		uppercase = string(runes)
+	}
+	return uppercase
+}
+
+func createNewProject(projectName, projectRouter, template string, out io.Writer) {
+	os.Mkdir(projectName, 0755)
+	os.MkdirAll(filepath.Join(projectName, "internal"), 0755)
+
+	// Prepare configs
+	frameworkConfig := framework.FrameworkRegistory[projectRouter]
+	var dbConfig *addons.DbAddOneConfig
+
 	if DBType != "" {
-		dbConfig := addons.DbRegistory[DBType]
+		cfg := addons.DbRegistory[DBType]
+		dbConfig = &cfg
+	}
 
-		dbTemplatePath := "db/" + DBType
+	uppercase := returnUppercase()
 
-		err := renderTemplateDir(dbTemplatePath, filepath.Join(projectName), TemplateData{
-			ModuleName: projectName,
-			PortName:   projectPort,
-			DBType:     DBType,
-		})
-		err = renderTemplateDir("db/database", filepath.Join(projectName, "internal", "db"), TemplateData{
-			ModuleName:  projectName,
-			PortName:    projectPort,
-			DBType:      DBType,
-			ServiceName: dbConfig.ServiceName,
-			DBName:      dbConfig.DBName,
-			DBEnvPrefix: dbConfig.DBEnvPrefix,
-			Port:        dbConfig.Port,
-			DSN:         dbConfig.DSN,
-			Driver:      dbConfig.Driver,
-			Import:      dbConfig.Import,
-			Image:       dbConfig.Image,
-			Environment: dbConfig.Environment,
-			Volume:      dbConfig.Volume,
-			VolumeName:  dbConfig.VolumeName,
-		})
-		if err != nil {
+	// Build TemplateData once
+	data := buildTemplateData(
+		projectName,
+		projectPort,
+		frameworkConfig,
+		dbConfig,
+		Entitys, uppercase)
 
-			fmt.Fprintf(out, "Error rendering  DB templates: %v\n", err)
-			return
-		}
+	// Render templates
+	renderTemplateDir("common", projectName, data)
+	renderTemplateDir("rest/clean", projectName, data)
+
+	if DBType != "" {
+		renderTemplateDir("db/"+DBType, projectName, data)
+		renderTemplateDir("db/database", filepath.Join(projectName, "internal/db"), data)
 
 		fmt.Fprintf(out, "✓ Added database support for '%s'\n", DBType)
 	}

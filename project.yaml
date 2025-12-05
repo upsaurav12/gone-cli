@@ -1,13 +1,21 @@
+project:
+  name: "test1"
+  port: 8080
+  arch: "clean"
 
-layers:
-  - domain
-  - repository
-  - service
-  - http
-  - config
 
-features:
-  - jwt
-  - redis-cache
-  - metrics
-  - tracing
+entity:
+- user
+- product
+- payments
+
+
+add_one:
+- db
+- auth
+- cache
+- queue
+- k8s
+
+
+
