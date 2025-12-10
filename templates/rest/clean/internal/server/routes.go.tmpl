@@ -2,27 +2,45 @@ package router
 
 import (
 	"{{.ModuleName}}/internal/handler"
+	"{{.ModuleName}}/internal/repository"
+	"{{.ModuleName}}/internal/service"
 	{{.ImportRouter}}
 )
 
-func (s *Server) RegisterRoutes() http.Handler {
+func (s *Server) RegisterRoutes() {{.HTTPHandler}} {
 	r := {{.Start}}
 
 	r.{{.Get}}("/", s.HelloWorldHandler)
 
 	r.{{.Get}}("/health", s.healthHandler)
 
-	{{call .ApiGroup  .Entity .Get .LowerEntity}}
+	gormDB := s.db.GetDB()
+
+	api := r.Group("/api/v1")
+	
+	{{range $i, $entity := .Entities}}
+		{{$upper := index $.UpperEntity $i}}
+		{{$lower := $entity}}
+
+	{{ printf "%sRepo := repository.New%sRepo(gormDB)" $lower $upper }}
+	{{ printf "%sService := service.New%sService(%sRepo)" $lower $upper $lower }}
+	{{ printf "%sHandler := handler.New%sHandler(%sService)" $lower $upper $lower }}
+
+		{{call $.ApiGroup $upper $.Get $lower}}
+	{{end}}
+
+
+
 	return r
 }
 
-func (s *Server) HelloWorldHandler({{.FullContext}}) {
+func (s *Server) HelloWorldHandler({{.FullContext}}) {{.Returnable}} {
 	resp := make(map[string]string)
 	resp["message"] = "Hello World"
 
-	{{.ToTheClient}} resp)
+	{{.ReturnKeyword}} {{.ToTheClient}} resp)
 }
 
-func (s *Server) healthHandler({{.FullContext}}) {
-	{{.ToTheClient}} s.db.Health())
+func (s *Server) healthHandler({{.FullContext}}) {{.Returnable}} {
+	{{.ReturnKeyword}} {{.ToTheClient}} s.db.Health())
 }

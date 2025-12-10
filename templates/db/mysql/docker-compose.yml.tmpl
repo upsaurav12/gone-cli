@@ -9,7 +9,6 @@ services:
       MYSQL_ROOT_PASSWORD: ${GONE_DB_PASSWORD}
     ports:
       - "${GONE_DB_PORT}:3306"
-    command: ["--default-authentication-plugin=mysql_native_password"]
     volumes:
       - mysql_volume_bp:/var/lib/mysql
 

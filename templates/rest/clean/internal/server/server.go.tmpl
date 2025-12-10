@@ -6,32 +6,45 @@ import (
 	"os"
 	"strconv"
 	{{- if .DBType }}
-	database "{{.ModuleName}}/internal/db"
+		database "{{.ModuleName}}/internal/db"
 	{{- end }}
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Server struct {
-	port int
-	db   database.Service
+	port   int
+	db     database.Service
+	gormDB *gorm.DB
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	NewServer := &Server{
-		port: port,
 
-		db: database.New(),
+	dbService := database.New()
+	if dbService == nil {
+		panic("database.New() returned nil — DB initialization failed")
 	}
 
-	// Declare Server config
-	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+	gormDB := dbService.GetDB()
+	if gormDB == nil {
+		panic("dbService.GetDB() returned nil — Gorm DB is not initialized")
+	}
+
+	srv := &Server{
+		port:   port,
+		db:     dbService,
+		gormDB: gormDB,
+	}
+
+	httpServer := &http.Server{
+		Addr:         fmt.Sprintf(":%d", srv.port),
+		Handler:      srv.RegisterRoutes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
 
-	return server
+	return httpServer
 }

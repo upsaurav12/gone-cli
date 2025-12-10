@@ -1,19 +1,21 @@
 package handler
 
 import (
-    {{.ImportHandler}}
+	"{{.ModuleName}}/internal/service"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-type {{.Entity}} struct {
-    ID int `json:"id"`
-    Name string `json:"name"`
+type {{.Entity}}Handler struct {
+	Service *service.{{.Entity}}Service
 }
 
-var {{.LowerEntity}}s =  []{{.Entity}}{
-    {ID: 1, Name: "Example 1"},
-	{ID: 2, Name: "Example 2"},
+func New{{.Entity}}Handler(s *service.{{.Entity}}Service) *{{.Entity}}Handler {
+	return &{{.Entity}}Handler{Service: s}
 }
 
-func Get{{.Entity}}s( {{.FullContext}} ) {
-	{{ .JSON }}{{.Response}}{{.LowerEntity}}s)
+func (h *{{.Entity}}Handler) Get{{.Entity}}s(c *gin.Context) {
+	{{.LowerEntity}}s, _ := h.Service.Get{{.Entity}}s()
+	c.JSON(http.StatusOK, {{.LowerEntity}}s)
 }
