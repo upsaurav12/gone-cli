@@ -1,0 +1,10 @@
+project:
+  name: "test1"
+  port: 8080
+  arch: "clean"
+  router: "chi"        # or gin / echo / fiber
+
+entities:
+- user
+- product
+- payment

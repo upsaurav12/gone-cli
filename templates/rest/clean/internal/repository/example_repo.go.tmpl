@@ -1,0 +1,24 @@
+package repository
+
+import (
+	"{{.ModuleName}}/internal/model"
+	"gorm.io/gorm"
+)
+
+type {{.Entity}}Repo struct {
+	DB *gorm.DB
+}
+
+func New{{.Entity}}Repo(db *gorm.DB) *{{.Entity}}Repo {
+	return &{{.Entity}}Repo{DB: db}
+}
+
+func (r *{{.Entity}}Repo) FindAll() ([]model.{{.Entity}}, error) {
+	var {{.LowerEntity}}s []model.{{.Entity}}
+	err := r.DB.Find(&{{.LowerEntity}}s).Error
+	return {{.LowerEntity}}s, err
+}
+
+func (r *{{.Entity}}Repo) Create({{.LowerEntity}}*model.{{.Entity}}) error {
+	return r.DB.Create({{.LowerEntity}}).Error
+}

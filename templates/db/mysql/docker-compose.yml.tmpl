@@ -1,0 +1,16 @@
+services:
+  mysql_bp:
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${GONE_DB_DATABASE}
+      MYSQL_USER: ${GONE_DB_USERNAME}
+      MYSQL_PASSWORD: ${GONE_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${GONE_DB_PASSWORD}
+    ports:
+      - "${GONE_DB_PORT}:3306"
+    volumes:
+      - mysql_volume_bp:/var/lib/mysql
+
+volumes:
+  mysql_volume_bp:

@@ -1,0 +1,14 @@
+project:
+  name: "{{ .ModuleName }}"
+  port: {{ .Port }}
+  router: "{{ .Router }}"
+  database: "{{ .DBType }}"
+
+entities:
+{{- if .Entities }}
+{{- range .Entities }}
+  - {{ . }}
+{{- end }}
+{{- else }}
+  - user
+{{- end }}

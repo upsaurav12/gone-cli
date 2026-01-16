@@ -1,0 +1,15 @@
+package model
+
+import (
+    "gorm.io/gorm"
+)
+
+type {{.Entity}} struct {
+    gorm.Model
+    ID int `json:"id"`
+    Name string `json:"name"`
+}
+
+func init() {
+    Register(&{{.Entity}}{})
+}

@@ -1,0 +1,15 @@
+services:
+  {{.ServiceName}}:
+    image: {{.Image}}
+    restart: unless-stopped
+
+    environment: |
+
+    ports:
+      - "${GONE_DB_PORT}:5432"
+
+    volumes:
+      - {{.Volume}}
+
+volumes:
+  {{.VolumeName}}:

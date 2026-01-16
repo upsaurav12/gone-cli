@@ -1,0 +1,50 @@
+package router
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"strconv"
+	{{- if .DBType }}
+		database "{{.ModuleName}}/internal/db"
+	{{- end }}
+	"time"
+
+	"gorm.io/gorm"
+)
+
+type Server struct {
+	port   int
+	db     database.Service
+	gormDB *gorm.DB
+}
+
+func NewServer() *http.Server {
+	port, _ := strconv.Atoi(os.Getenv("PORT"))
+
+	dbService := database.New()
+	if dbService == nil {
+		panic("database.New() returned nil — DB initialization failed")
+	}
+
+	gormDB := dbService.GetDB()
+	if gormDB == nil {
+		panic("dbService.GetDB() returned nil — Gorm DB is not initialized")
+	}
+
+	srv := &Server{
+		port:   port,
+		db:     dbService,
+		gormDB: gormDB,
+	}
+
+	httpServer := &http.Server{
+		Addr:         fmt.Sprintf(":%d", srv.port),
+		Handler:      srv.RegisterRoutes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+	}
+
+	return httpServer
+}

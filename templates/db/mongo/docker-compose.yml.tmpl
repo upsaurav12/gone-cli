@@ -1,0 +1,15 @@
+services:
+  mongo_bp:
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: ${GONE_DB_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: ${GONE_DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${GONE_DB_PASSWORD}
+    ports:
+      - "${GONE_DB_PORT}:27017"
+    volumes:
+      - mongo_volume_bp:/data/db
+
+volumes:
+  mongo_volume_bp:

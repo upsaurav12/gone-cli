@@ -1,0 +1,69 @@
+package database
+
+import (
+	"{{.ModuleName}}/internal/model"
+	"fmt"
+	"log"
+	"os"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/joho/godotenv/autoload"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+// Service represents a service that interacts with a database.
+type Service interface {
+	Health() map[string]string
+	Close() error
+	GetDB() *gorm.DB
+}
+
+type service struct {
+	db *gorm.DB
+}
+
+var (
+	database   = os.Getenv("GONE_DB_DATABASE")
+	password   = os.Getenv("GONE_DB_PASSWORD")
+	username   = os.Getenv("GONE_DB_USERNAME")
+	port       = os.Getenv("GONE_DB_PORT")
+	host       = os.Getenv("GONE_DB_HOST")
+	schema     = os.Getenv("GONE_DB_SCHEMA")
+	dbInstance *service
+)
+
+func New() Service {
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		host, username, password, database, port,
+	)
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("failed to connect database: %v", err)
+	}
+
+	db.AutoMigrate(model.Registry...)
+
+	dbInstance = &service{db: db}
+	return dbInstance
+}
+
+func (s *service) GetDB() *gorm.DB {
+	return s.db
+}
+
+func (s *service) Health() map[string]string {
+	sqlDB, _ := s.db.DB()
+	err := sqlDB.Ping()
+	if err != nil {
+		return map[string]string{"status": "down"}
+	}
+	return map[string]string{"status": "up"}
+}
+
+func (s *service) Close() error {
+	sqlDB, _ := s.db.DB()
+	return sqlDB.Close()
+}

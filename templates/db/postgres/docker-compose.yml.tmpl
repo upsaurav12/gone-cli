@@ -1,0 +1,15 @@
+services:
+  psql_bp:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${GONE_DB_DATABASE}
+      POSTGRES_USER: ${GONE_DB_USERNAME}
+      POSTGRES_PASSWORD: ${GONE_DB_PASSWORD}
+    ports:
+      - "${GONE_DB_PORT}:5432"
+    volumes:
+      - psql_volume_bp:/var/lib/postgresql
+
+volumes:
+  psql_volume_bp:

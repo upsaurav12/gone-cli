@@ -1,0 +1,58 @@
+package router
+
+import (
+	"{{.ModuleName}}/internal/handler"
+	"{{.ModuleName}}/internal/repository"
+	"{{.ModuleName}}/internal/service"
+	{{.ImportRouter}}
+)
+
+func (s *Server) RegisterRoutes() {{.HTTPHandler}} {
+	r := {{.Start}}
+
+	r.{{.Get}}("/", s.HelloWorldHandler)
+
+	r.{{.Get}}("/health", s.healthHandler)
+
+	gormDB := s.db.GetDB()
+
+
+	api := r.Group("/api/v1")
+
+	{{ if .Entities }}
+		{{ range $i, $entity := .Entities }}
+			{{ $upper := index $.UpperEntity $i }}
+			{{ $lower := $entity }}
+
+			{{ printf "%sRepo := repository.New%sRepo(gormDB)" $lower $upper }}
+			{{ printf "%sService := service.New%sService(%sRepo)" $lower $upper $lower }}
+			{{ printf "%sHandler := handler.New%sHandler(%sService)" $lower $upper $lower }}
+
+			{{ call $.ApiGroup $upper $.Get $lower }}
+		{{ end }}
+	{{ else }}
+		userRepo := repository.NewUserRepo(gormDB)
+		userService := service.NewUserService(userRepo)
+		userHandler := handler.NewUserHandler(userService)
+
+		{
+			user := api.Group("/user")
+			{
+				user.GET("", userHandler.GetUsers)
+			}
+		}
+	{{ end }}
+
+	return r
+}
+
+func (s *Server) HelloWorldHandler({{.FullContext}}) {{.Returnable}} {
+	resp := make(map[string]string)
+	resp["message"] = "Hello World"
+
+	{{.ReturnKeyword}} {{.ToTheClient}} resp)
+}
+
+func (s *Server) healthHandler({{.FullContext}}) {{.Returnable}} {
+	{{.ReturnKeyword}} {{.ToTheClient}} s.db.Health())
+}
