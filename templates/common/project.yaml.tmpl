@@ -2,9 +2,13 @@ project:
   name: "{{ .ModuleName }}"
   port: {{ .Port }}
   router: "{{ .Router }}"
-  postgres: "{{ .DBName }}"
+  database: "{{ .DBType }}"
 
 entities:
+{{- if .Entities }}
 {{- range .Entities }}
   - {{ . }}
+{{- end }}
+{{- else }}
+  - user
 {{- end }}
