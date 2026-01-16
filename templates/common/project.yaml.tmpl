@@ -1,0 +1,10 @@
+project:
+  name: "{{ .ModuleName }}"
+  port: {{ .Port }}
+  router: "{{ .Router }}"
+  postgres: "{{ .DBName }}"
+
+entities:
+{{- range .Entities }}
+  - {{ . }}
+{{- end }}

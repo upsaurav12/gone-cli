@@ -306,6 +306,21 @@ func newList(title string, values []string) list.Model {
 	return l
 }
 
+func copyProjectYAML(srcPath, destDir string) error {
+	if srcPath == "" {
+		return nil // nothing to copy
+	}
+
+	content, err := os.ReadFile(srcPath)
+	if err != nil {
+		return err
+	}
+
+	destPath := filepath.Join(destDir, "project.yaml")
+
+	return os.WriteFile(destPath, content, 0644)
+}
+
 func RunInteractiveWizard() (*ProjectInput, error) {
 	p := tea.NewProgram(initialWizardModel())
 	model, err := p.Run()
@@ -543,6 +558,11 @@ func createNewProject(projectName, projectRouter, template string, out io.Writer
 
 	if err != nil {
 		log.Fatalf("error occured while creating a new project %s: ", projectName)
+	}
+
+	// ✅ COPY project.yaml if provided
+	if err := copyProjectYAML(YAMLPath, projectName); err != nil {
+		fmt.Fprintf(out, "warning: could not copy project.yaml: %v\n", err)
 	}
 
 	// Prepare configs
